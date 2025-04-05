@@ -46,4 +46,4 @@ class Order_Details(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
     order_id: int = Field(foreign_key="orders.id")
     recipe_id: int = Field(foreign_key="recipes.id")
-    quantity: int = Field(default=1, nullable=False)
+    quantity: int = Field(default=1, nullable=False , gt=0)

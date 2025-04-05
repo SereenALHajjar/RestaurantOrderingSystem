@@ -1,7 +1,4 @@
-# place an order
-# get order status
-# change order status
-# get specific order
+
 
 import datetime
 from fastapi import APIRouter, HTTPException
@@ -17,14 +14,17 @@ class Order(BaseModel):
     user_id: int
     restaurant_id: int
 
-@router.get("/status/{order_id}")
-async def get_status(order_id:int , session:SessionDep):
-    existing_order = session.exec(select(Orders).where(Orders.id == order_id)).first()
-    if existing_order is None:
-        raise HTTPException(status_code=404 , detail="No such order")
-    return {"status":existing_order.status}
 
-@router.post("/add")
+@router.get("/status/{order_id}")
+async def get_status(order_id: int, session: SessionDep):
+    existing_order = session.exec(
+        select(Orders).where(Orders.id == order_id)).first()
+    if existing_order is None:
+        raise HTTPException(status_code=404, detail="No such order")
+    return {"status": existing_order.status}
+
+
+@router.post("/")
 async def add_order(order: Order, session: SessionDep):
     restaurant = session.exec(select(Restaurants).where(
         Restaurants.id == order.restaurant_id)).first()
@@ -47,11 +47,11 @@ async def add_order(order: Order, session: SessionDep):
 
 
 @router.patch("/")
-async def change_status(order_id:int, new_status: str, session:SessionDep):
-    existing_order = session.get(Orders , order_id)
+async def change_status(order_id: int, new_status: str, session: SessionDep):
+    existing_order = session.get(Orders, order_id)
     if not existing_order:
-        raise HTTPException(status_code=404 , detail="No such order")
+        raise HTTPException(status_code=404, detail="No such order")
     existing_order.status = new_status
     session.commit()
-    session.refresh(existing_order)  
+    session.refresh(existing_order)
     return {"message": "Order status updated", "order": existing_order}
