@@ -7,7 +7,7 @@ from app.models import Users
 router = APIRouter(prefix="/users", tags=["users"])
 
 
-@router.get("user/{user_id}")
+@router.get("/{user_id}")
 async def get_user(user_id: int, session: SessionDep) -> Users:
     """ take the id and return the user """
     db_user = session.exec(select(Users).where(Users.id == user_id)).first()
