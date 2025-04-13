@@ -16,6 +16,7 @@ async def get_user(user_id: int, session: SessionDep) -> Users:
     return db_user
 
 
+
 @router.post("/signup")
 async def signup(user: Users, session: SessionDep) -> Users:
     existing_user = session.exec(

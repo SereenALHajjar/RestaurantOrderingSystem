@@ -59,7 +59,7 @@ async def add_recipe(
     price: float = Form(...),
     category: str = Form(None),
     restaurant_id: int = Form(...),
-    photo: UploadFile = File(...),
+    photo: UploadFile|None = File(None),
 ):
     
     existing_recipe = session.exec(
@@ -71,26 +71,35 @@ async def add_recipe(
 
     if existing_recipe:
         raise HTTPException(status_code=400, detail="Recipe already exists")
+    new_recipe = None 
+    if photo:
+        file_ext = photo.filename.split(".")[-1]
+        filename = f"{uuid4()}.{file_ext}"
+        file_path = os.path.join("app" , "static", "uploads", filename)
 
-    file_ext = photo.filename.split(".")[-1]
-    filename = f"{uuid4()}.{file_ext}"
-    file_path = os.path.join("app" , "static", "uploads", filename)
-
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(photo.file, buffer)
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(photo.file, buffer)
 
     # photo_url = f"C:\\Workspace\\backend\\ResturantOrderingSystesm\\app\\static\\uploads/{filename}" 
-    new_recipe = Recipes(
-        name=name,
-        description=description,
-        price=price,
-        category=category,
-        restaurant_id=restaurant_id,
-        photo=file_path
-    )
-
+        new_recipe = Recipes(
+            name=name,
+            description=description,
+            price=price,
+            category=category,
+            restaurant_id=restaurant_id,
+            photo=file_path
+        )
+    else:
+        new_recipe = Recipes(
+            name=name,
+            description=description,
+            price=price,
+            category=category,
+            restaurant_id=restaurant_id,
+            photo=None
+        )
     session.add(new_recipe)
     session.commit()
     session.refresh(new_recipe)
 
-    return {"message": "Recipe added successfully", "recipe": new_recipe}
+    return new_recipe
